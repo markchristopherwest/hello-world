@@ -8,27 +8,23 @@ echo BEGIN
 date '+%Y-%m-%d %H:%M:%S'
 
 
-# Update Everything
-sudo apt-get update
+sudo useradd -m $mongo_username
 
-# Tools
-sudo apt-get install -y awscli s3fs 
+
+sudo apt-get update -y
+sudo apt-get install -y awscli s3fs libc6 libcurl4t64 libssl3t64
 
 
 
 # Install Services to Target
 echo "Installing MongoDB"
-sudo apt-get install gnupg curl
-curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
-   sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg \
-   --dearmor
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+sudo apt-get install -y gnupg curl
+
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 
-sudo mkdir -p /data/db
-sudo chown -R $USER /data/db 
-sudo chmod -R go+w /data/db
 
 sudo systemctl daemon-reload
 
@@ -38,12 +34,41 @@ sudo systemctl status mongod
 
 sudo systemctl enable mongod
 
-mongo redirect --eval 'db.createCollection("first"); db.createCollection("second"); db.createCollection("third")'
-mongo redirect --eval "db.addUser(${mongo_username}, ${mongo_password})"
+mongosh redirect --eval 'db.createCollection("first"); db.createCollection("second"); db.createCollection("third")'
+mongosh redirect --eval "use('hello-world')"
+mongosh redirect --eval 'db.posts.insertMany([  
+  {
+    title: "Post Title 2",
+    body: "Body of post.",
+    category: "Event",
+    likes: 2,
+    tags: ["news", "events"],
+    date: Date()
+  },
+  {
+    title: "Post Title 3",
+    body: "Body of post.",
+    category: "Technology",
+    likes: 3,
+    tags: ["news", "events"],
+    date: Date()
+  },
+  {
+    title: "Post Title 4",
+    body: "Body of post.",
+    category: "Event",
+    likes: 4,
+    tags: ["news", "events"],
+    date: Date()
+  }
+])'
+
+mongosh redirect --eval 'db.posts.find()'
+
 
 # Install OMZ
-# sudo apt-get install -y zsh
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-# sudo omz update
+sudo apt-get install -y zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+sudo omz update
 
 echo END
