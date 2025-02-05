@@ -36,7 +36,7 @@ eksctl create iamserviceaccount \
 ## Add custom helm repo
 helm repo add markchristopherwest https://markchristopherwest.github.io/hello-world-chart
 
-helm pull ghcr.io/markchristopherwest/hello-world:latest 
+helm pull markchristopherwest/hello-world-chart
 
 helm install frontend markchristopherwest/hello-world-chart
 
