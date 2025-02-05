@@ -3,8 +3,8 @@
 # Use the official Golang image as the base image
 FROM golang:1.23-alpine AS build
 
-ENV DB_HOST "localhost"
-ENV DB_PORT 27017
+ENV DB_HOST="localhost"
+ENV DB_PORT=27017
 
 # Set the working directory inside the container
 WORKDIR /app

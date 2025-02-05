@@ -65,6 +65,8 @@ mongosh redirect --eval 'db.posts.insertMany([
 
 mongosh redirect --eval 'db.posts.find()'
 
+mongodump --out=/opt/backup/mongodump-1 
+
 
 # Install OMZ
 sudo apt-get install -y zsh

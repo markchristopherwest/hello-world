@@ -32,3 +32,12 @@ eksctl create iamserviceaccount \
     --namespace=kube-system \
     --attach-policy-arn=arn:aws:iam::${AWS_ACCOUNT}:policy/AWSLoadBalancerControllerIAMPolicy \
     --approve
+
+## Add custom helm repo
+helm repo add markchristopherwest https://markchristopherwest.github.io/hello-world-chart
+
+helm pull ghcr.io/markchristopherwest/hello-world:latest 
+
+helm install frontend markchristopherwest/hello-world-chart
+
+kubectl get pods
