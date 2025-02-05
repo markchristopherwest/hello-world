@@ -1,12 +1,17 @@
+# Create arguments for the DB target
 
 # Use the official Golang image as the base image
 FROM golang:1.23-alpine AS build
+
+ENV DB_HOST "localhost"
+ENV DB_PORT 27017
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy the Go module files
 COPY go.mod go.sum ./
+COPY mongo-setup.js /docker-entrypoint-initdb.d/mongo-init.js:
 
 # Download the Go module dependencies
 RUN go mod download

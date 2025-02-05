@@ -1,13 +1,25 @@
+
 services:
   frontend:
+    container_name: frontend
     # image: example/gomongo
     build:
       dockerfile: ./Dockerfile
+    ports:
+      - '8080:8080'
+    env_file:
+        - .env
   mongodb:
+    container_name: mongodb
     image: mongo:6-jammy
     ports:
       - '27017:27017'
     volumes:
+      - ./mongo-setup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - dbdata6:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: changeme
+      MONGO_INITDB_DATABASE: root-db
 volumes:
   dbdata6:
