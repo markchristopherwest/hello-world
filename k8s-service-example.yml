@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+  namespace: apps
+  labels:
+    app.kubernetes.io/name: hello-world
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hello-world
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hello-world
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: hello-world
+          image: markchristopherwest/hello-world
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: app-port
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 0.125
+              memory: 50Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  namespace: apps
+  labels:
+    app.kubernetes.io/name: hello-world
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: hello-world
+  ports:
+    - name: svc-port
+      port: 80
+      targetPort: app-port
+      protocol: TCP

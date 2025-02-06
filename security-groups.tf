@@ -15,7 +15,7 @@ resource "aws_security_group" "mongo" {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    cidr_blocks = [module.eks.cluster_service_cidr]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {

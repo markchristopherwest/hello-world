@@ -84,7 +84,7 @@ data "aws_ami" "ubuntu" {
 
 locals {
   cluster_name = random_pet.example.id
-  owner_email = split(":", data.aws_caller_identity.current.user_id)[1]
+  owner_email = "markchristopherwest@gmail.com"
 }
 
 
@@ -140,7 +140,7 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   eks_managed_node_group_defaults = {
-    ami_type = "AL2_x86_64"
+    ami_type = "AL2023_ARM_64_STANDARD"
 
   }
 
@@ -148,7 +148,7 @@ module "eks" {
     one = {
       name = "node-group-1"
 
-      instance_types = ["t3.small"]
+      instance_types = ["m6g.medium"]
 
       min_size     = 1
       max_size     = 3
@@ -158,7 +158,7 @@ module "eks" {
     two = {
       name = "node-group-2"
 
-      instance_types = ["t3.small"]
+      instance_types = ["m6g.medium"]
 
       min_size     = 1
       max_size     = 2

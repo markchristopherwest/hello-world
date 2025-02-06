@@ -28,16 +28,41 @@ func main() {
 
 	// Check if the environment variable exists
 	if dbPort == "" {
-		fmt.Println("Environment variable DB_HOST not set.")
+		fmt.Println("Environment variable DB_PORT not set.")
 	} else {
 		fmt.Println("Value of DB_PORT:", dbPort)
 	}
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbUser := os.Getenv("DB_USER")
 
-	username := "dude"
-	password := "dude"
-	database := "admin"
+	// Check if the environment variable exists
+	if dbUser == "" {
+		fmt.Println("Environment variable DB_USER not set.")
+	} else {
+		fmt.Println("Value of DB_USER:", dbPort)
+	}
 
-	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", username, password, dbHost, dbPort, database)
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbPass := os.Getenv("DB_PASS")
+
+	// Check if the environment variable exists
+	if dbPass == "" {
+		fmt.Println("Environment variable DB_PASS not set.")
+	} else {
+		fmt.Println("Value of DB_PASS:", dbPort)
+	}
+
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbName := os.Getenv("DB_NAME")
+
+	// Check if the environment variable exists
+	if dbPass == "" {
+		fmt.Println("Environment variable DB_NAME not set.")
+	} else {
+		fmt.Println("Value of DB_NAME:", dbPort)
+	}
+
+	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 
 	fmt.Println(connectionString)
 
@@ -59,7 +84,7 @@ func main() {
 	log.Println("Connected to MongoDB!")
 
 	// Access a database
-	db := client.Database(database)
+	db := client.Database(dbName)
 
 	// Access a collection
 	collection := db.Collection("first")
@@ -72,7 +97,7 @@ func main() {
 	}
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
-	port := 8080
+	port := 3000
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Welcome to my Golang web server!\n")
 
@@ -100,7 +125,7 @@ func main() {
 	log.Printf("Server is listening on port %s...\n", port)
 
 	fmt.Printf("Let's get ready to rumble!")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":3000", nil)
 
 	// Disconnect from MongoDB
 	err = client.Disconnect(context.TODO())

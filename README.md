@@ -26,18 +26,42 @@ helm upgrade -i ingress-nginx ingress-nginx/ingress-nginx \
 
 ## with your nginx ingress controller installed deploy the load balancer controller
 
+
+# https://aws.amazon.com/blogs/containers/exposing-kubernetes-applications-part-3-nginx-ingress-controller/
+
+
+curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.7/docs/install/iam_policy.json  
+
+
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam-policy.json
+
+export iteration="good-rattler"
+
 eksctl create iamserviceaccount \
-    --cluster=arn:aws:eks:us-west-2:807078899029:cluster/ideal-turtle \
+    --cluster=good-rattler \
     --name=aws-load-balancer-controller \
     --namespace=kube-system \
     --attach-policy-arn=arn:aws:iam::${AWS_ACCOUNT}:policy/AWSLoadBalancerControllerIAMPolicy \
     --approve
+
+
+
+helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
+    -n kube-system \
+    --set clusterName=good-rattler \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=aws-load-balancer-controller
 
 ## Add custom helm repo
 helm repo add markchristopherwest https://markchristopherwest.github.io/hello-world-chart
 
 helm pull markchristopherwest/hello-world-chart
 
+helm install --set DB_HOST=ec2-W-X-Y-Z.compute.amazonaws.com frontend markchristopherwest/hello-world-chart
+
 helm install frontend markchristopherwest/hello-world-chart
 
 kubectl get pods
+

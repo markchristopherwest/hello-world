@@ -20,10 +20,63 @@ resource "local_file" "ssh_key" {
 }
 
 
+# Create an IAM role for the mongo_s3 Servers.
+resource "aws_iam_role" "mongo_s3_iam_role" {
+    name = "mongo_s3_iam_role"
+    assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_instance_profile" "mongo_s3_instance_profile" {
+    name = "mongo_s3_instance_profile"
+    role = aws_iam_role.mongo_s3_iam_role.name
+}
+
+resource "aws_iam_role_policy" "mongo_s3_iam_role_policy" {
+  name = "mongo_s3_iam_role_policy"
+  role = "${aws_iam_role.mongo_s3_iam_role.id}"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::${random_pet.example.id}"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": ["arn:aws:s3:::${random_pet.example.id}/*"]
+    }
+  ]
+}
+EOF
+}
+
+
+
 resource "aws_instance" "mongo" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.medium"
-  subnet_id              = "subnet-063d122f42897e29b"
+  subnet_id              = "subnet-0fc40bb00d2b7e817"
   associate_public_ip_address = true
   key_name               = aws_key_pair.demo_ec2_ssh_key_pair.key_name
   vpc_security_group_ids = [
@@ -35,15 +88,19 @@ resource "aws_instance" "mongo" {
     "User" : local.owner_email
   })
 
-  user_data = templatefile("${path.module}/user-data.sh", {
+  user_data = base64gzip(templatefile("${path.module}/user-data.sh", {
+    iteration = "${random_pet.example.id}"
     mongo_username = "mongo"
     mongo_password = "mongo"
-  })
+    mongo_db_name = "hello-world"
+    
+  }))
 
   root_block_device {
     volume_type = "gp3"
   }
 
+    iam_instance_profile = "${aws_iam_instance_profile.mongo_s3_instance_profile.id}"
   # lifecycle {
   #   ignore_changes = all
   # }
