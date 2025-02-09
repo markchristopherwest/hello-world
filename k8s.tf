@@ -3,12 +3,37 @@ provider "kubernetes" {
   config_path    = "~/.kube/config"
   config_context = "${module.eks.cluster_arn}"
 }
-
-resource "kubernetes_namespace" "apps" {
+resource "kubernetes_role_binding" "example" {
   metadata {
-    name = "apps"
+    name      = "terraform-example"
+    namespace = "default"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = "admin"
+  }
+  subject {
+    kind      = "User"
+    name      = "admin"
+    api_group = "rbac.authorization.k8s.io"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "default"
+    namespace = "kube-system"
+  }
+  subject {
+    kind      = "Group"
+    name      = "system:masters"
+    api_group = "rbac.authorization.k8s.io"
   }
 }
+# resource "kubernetes_namespace" "apps" {
+#   metadata {
+#     name = "apps"
+#   }
+# }
 
 # resource "kubernetes_secret" "example" {
 #   metadata {

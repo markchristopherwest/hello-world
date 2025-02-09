@@ -21,13 +21,13 @@ db.createUser({
 
   roles: [ { role: "readWrite", db: "hello_world" },
     { role: "readWrite", db: "admin" } ],
-    mechanisms: ["SCRAM-SHA-1"]
+    mechanisms: ["SCRAM-SHA-1", "SCRAM-SHA-256"]
 });
 
 db.auth( {
   user: "dude",
   pwd: "changeme",
-  mechanism: "SCRAM-SHA-1"
+  mechanism: "SCRAM-SHA-256"
 } )
 
 db.posts.insertMany([  

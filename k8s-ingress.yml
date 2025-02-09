@@ -24,6 +24,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: webserver
                 port:
                   name: svc-port
