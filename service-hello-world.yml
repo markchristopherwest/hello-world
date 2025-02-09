@@ -19,18 +19,7 @@ spec:
       containers:
         - name: ${SERVICE_NAME}
           image: markchristopherwest/hello-world
-          imagePullPolicy: Always
-          env:
-            - name: DB_HOST
-              value: "${DB_HOST}"
-            - name: DB_PORT
-              value: "27017"
-            - name: DB_NAME
-              value: "hello_world"
-            - name: DB_USER
-              value: "dude"
-            - name: DB_PASS
-              value: "changeme"
+          imagePullPolicy: IfNotPresent
           ports:
             - name: app-port
               containerPort: 3000

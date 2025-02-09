@@ -1,0 +1,118 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func main() {
+
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbHost := os.Getenv("DB_HOST")
+
+	// Check if the environment variable exists
+	if dbHost == "" {
+		fmt.Println("Environment variable DB_HOST not set.")
+	} else {
+		fmt.Println("Value of DB_HOST:", dbHost)
+	}
+
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbPort := os.Getenv("DB_PORT")
+
+	// Check if the environment variable exists
+	if dbPort == "" {
+		fmt.Println("Environment variable DB_PORT not set.")
+	} else {
+		fmt.Println("Value of DB_PORT:", dbPort)
+	}
+
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbUser := os.Getenv("DB_USER")
+
+	// Check if the environment variable exists
+	if dbUser == "" {
+		fmt.Println("Environment variable DB_USER not set.")
+	} else {
+		fmt.Println("Value of DB_USER:", dbUser)
+	}
+
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbPass := os.Getenv("DB_PASS")
+
+	// Check if the environment variable exists
+	if dbPass == "" {
+		fmt.Println("Environment variable DB_PASS not set.")
+	} else {
+		fmt.Println("Value of DB_PASS:", dbPass)
+	}
+
+	// Get the value of the environment variable "MY_ENV_VAR"
+	dbName := os.Getenv("DB_NAME")
+
+	// Check if the environment variable exists
+	if dbName == "" {
+		fmt.Println("Environment variable DB_NAME not set.")
+	} else {
+		fmt.Println("Value of DB_NAME:", dbName)
+	}
+
+	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authMechanism=SCRAM-SHA-256", dbUser, dbPass, dbHost, dbPort, "admin")
+
+	fmt.Println(connectionString)
+
+	clientOptions := options.Client().ApplyURI(connectionString)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := client.Disconnect(context.TODO()); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	collection := client.Database(dbName).Collection("first")
+
+	// Example with context deadline
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Insert a document with a timeout
+	_, err = collection.InsertOne(ctx, bson.D{{"name", "John Doe"}, {"age", 30}})
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			fmt.Println("Insert operation timed out")
+		} else {
+			log.Fatal(err)
+		}
+		return
+	}
+	fmt.Println("Document inserted successfully")
+
+	// Find a document with a timeout
+	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	var result bson.M
+	err = collection.FindOne(ctx, bson.M{"name": "John Doe"}).Decode(&result)
+
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			fmt.Println("Find operation timed out")
+		} else if err == mongo.ErrNoDocuments {
+			fmt.Println("Document not found")
+		} else {
+			log.Fatal(err)
+		}
+		return
+	}
+	fmt.Println("Document found:", result)
+}

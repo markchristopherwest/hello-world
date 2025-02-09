@@ -2,17 +2,33 @@ db.createCollection("first"); db.createCollection("second"); db.createCollection
 
 
 print("Started Adding the Users.");
+
 db = db.getSiblingDB("admin");
 db.createUser({
   user: "dude",
   pwd: "changeme",
 
-  roles: [ { role: "readWrite", db: "hello-world" },
-    { role: "readWrite", db: "admin" } ]
+  roles: [ { role: "readWrite", db: "hello_world" },
+    { role: "readWrite", db: "admin" } ],
+    mechanisms: ["SCRAM-SHA-1", "SCRAM-SHA-256"]
 });
 print("End Adding the User Roles.");
 
-use('hello-world');
+
+db.createUser({
+  user: "dude",
+  pwd: "changeme",
+
+  roles: [ { role: "readWrite", db: "hello_world" },
+    { role: "readWrite", db: "admin" } ],
+    mechanisms: ["SCRAM-SHA-1"]
+});
+
+db.auth( {
+  user: "dude",
+  pwd: "changeme",
+  mechanism: "SCRAM-SHA-1"
+} )
 
 db.posts.insertMany([  
     {
@@ -41,14 +57,3 @@ db.posts.insertMany([
     }
   ]);
 
-
-  db.createUser(
-    {
-      user: "dude",
-      pwd:  "dude",   // or cleartext password
-      roles: [ { role: "readWrite", db: "hello-world" },
-               { role: "read", db: "reporting" } ]
-    }
-  );
-
-  db.runCommand({updateUser: "dude", pwd: "dude", mechanisms: ["SCRAM-SHA-1"]});

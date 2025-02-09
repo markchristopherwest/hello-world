@@ -71,12 +71,16 @@ resource "aws_iam_role_policy" "mongo_s3_iam_role_policy" {
 EOF
 }
 
+data "aws_subnet" "example" {
+  for_each = toset(data.aws_subnets.example.ids)
+  id       = each.value
+}
 
 
 resource "aws_instance" "mongo" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.medium"
-  subnet_id              = "subnet-0fc40bb00d2b7e817"
+  subnet_id              = [for s in data.aws_subnet.example : s.id][0]
   associate_public_ip_address = true
   key_name               = aws_key_pair.demo_ec2_ssh_key_pair.key_name
   vpc_security_group_ids = [
@@ -90,9 +94,9 @@ resource "aws_instance" "mongo" {
 
   user_data = base64gzip(templatefile("${path.module}/user-data.sh", {
     iteration = "${random_pet.example.id}"
-    mongo_username = "mongo"
-    mongo_password = "mongo"
-    mongo_db_name = "hello-world"
+    mongo_username = "dude"
+    mongo_password = "changeme"
+    mongo_database = "hello_world"
     
   }))
 

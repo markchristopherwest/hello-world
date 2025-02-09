@@ -64,8 +64,17 @@ data "aws_subnets" "example" {
     name   = "vpc-id"
     values = [module.vpc.vpc_id]
   }
-
+  filter {
+    name   = "tag:Name"
+    values = ["${random_pet.example.id}-public-us-west-2a"] # insert values here
+  }
+  
 }
+
+
+
+
+
 
 data "aws_availability_zones" "azs" {}
 
@@ -73,7 +82,7 @@ data "aws_ami" "ubuntu" {
   most_recent = true
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
   }
   filter {
     name   = "virtualization-type"
